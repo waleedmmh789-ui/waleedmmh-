@@ -11,17 +11,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract zip to repo root
+      - name: Extract any zip to repo root
         run: |
-          if [ ! -f waleedmmh.zip ]; then echo "no zip found"; exit 0; fi
-          unzip -o waleedmmh.zip -d _tmp
-          cp -a _tmp/waleedmmh/. .
-          rm -rf _tmp waleedmmh.zip
+          shopt -s nullglob
+          zips=(*.zip)
+          if [ ${#zips[@]} -eq 0 ]; then echo "no zip found"; exit 0; fi
+          for z in "${zips[@]}"; do
+            rm -rf _tmp; mkdir _tmp
+            unzip -o "$z" -d _tmp
+            if [ "$(ls -A _tmp | wc -l)" -eq 1 ] && [ -d "_tmp/$(ls _tmp)" ]; then
+              cp -a "_tmp/$(ls _tmp)/." .
+            else
+              cp -a _tmp/. .
+            fi
+            rm -f "$z"
+          done
+          rm -rf _tmp
 
       - name: Commit extracted files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Extract project from waleedmmh.zip" || echo "nothing to commit"
+          git commit -m "Extract project from zip" || echo "nothing to commit"
           git push
