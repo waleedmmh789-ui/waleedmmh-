@@ -1,10 +1,6 @@
 name: Unzip project
 
-on:
-  push:
-    paths:
-      - 'waleedmmh.zip'
-  workflow_dispatch:
+on: [push, workflow_dispatch]
 
 permissions:
   contents: write
@@ -17,7 +13,7 @@ jobs:
 
       - name: Extract zip to repo root
         run: |
-          if [ ! -f waleedmmh.zip ]; then echo "no zip found, nothing to do"; exit 0; fi
+          if [ ! -f waleedmmh.zip ]; then echo "no zip found"; exit 0; fi
           unzip -o waleedmmh.zip -d _tmp
           cp -a _tmp/waleedmmh/. .
           rm -rf _tmp waleedmmh.zip
